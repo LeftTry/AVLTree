@@ -7,6 +7,7 @@ using namespace std;
 
 template <typename T>
 class Node{
+public:
     T data;
     int height;
     Node<T>* left;
@@ -28,7 +29,7 @@ template<typename T>
 Node<T>::Node() {
     left = nullptr;
     right = nullptr;
-    height = 0;
+    height = 1;
 }
 
 template<typename T>
@@ -36,7 +37,7 @@ Node<T>::Node(T data_) {
     data = data_;
     left = nullptr;
     right = nullptr;
-    height = 0;
+    height = 1;
 }
 
 template<typename T>
@@ -90,6 +91,7 @@ public:
     Node<T>* searchMin();
     Node<T>* removeMin();
     Node<T>* remove(T k);
+    void print();
 };
 
 template<typename T>
@@ -104,32 +106,44 @@ Tree<T>::Tree() {
 
 template<typename T>
 Node<T>* Tree<T>::insert(T k) {
-    Node<T>* p = root;
-    return insert(p, k);
+    root = Insert(root, k);
+    cout << "oko" << endl;
+    return root;
 }
 
 template<typename T>
 Node<T>* Tree<T>::search(T k) {
-    Node<T>* p = root;
-    return search(p, k);
+    return Search(root, k);
 }
 
 template<typename T>
 Node<T>* Tree<T>::searchMin() {
-    Node<T>* p = root;
-    return searchMin(p);
+    return SearchMin(root);
 }
 
 template<typename T>
 Node<T> *Tree<T>::removeMin() {
-    Node<T>* p = root;
-    return removeMin(p);
+    return RemoveMin(root);
 }
 
 template<typename T>
 Node<T> *Tree<T>::remove(T k) {
-    Node<T>* p = root;
-    return remove(p, k);
+    return Remove(root, k);
+}
+
+template<typename T>
+void Tree<T>::print() {
+    if(root == nullptr) cout << "ok" << endl;
+    Print(root);
+}
+
+template <typename T>
+void Print(Node<T>* node){
+    if(node != nullptr) {
+        cout << node->data << endl;
+        Print(node->left);
+        Print(node->right);
+    }
 }
 
 template <typename T>
@@ -180,7 +194,7 @@ Node<T>* balance(Node<T>* p){
             return rotateLeft(p);
         }
     }
-    if(balanceFactor(p->left) == -2){
+    if(balanceFactor(p) == -2){
         if(balanceFactor(p->left) > 0){
             p->left = rotateLeft(p->left);
             return rotateRight(p);
@@ -190,28 +204,29 @@ Node<T>* balance(Node<T>* p){
 }
 
 template<typename T>
-Node<T>* insert(Node<T>* p, T k) {
-    if(p == nullptr)
+Node<T>* Insert(Node<T>* p, T k) {
+    if(p == nullptr) {
         return new Node<T>(k);
+    }
     if(k < p->data){
-        p->left = insert(p->left, k);
+        p->left = Insert(p->left, k);
     }
     else{
-        p->right = insert(p->right, k);
+        p->right = Insert(p->right, k);
     }
     return balance(p);
 }
 
 template<typename T>
-Node<T>* search(Node<T>* p, T k) {
-    if(p == nullptr) return nullptr;
-    if(p->data < k) search(p->left, k);
-    else if(p->data > k) search(p->right, k);
+Node<T>* Search(Node<T>* p, T k) {
+    if(p == nullptr){ cout << "ok" << endl;return nullptr;}
+    if(p->data > k) Search(p->left, k);
+    else if(p->data < k){  Search(p->right, k);}
     else if(p->data == k) return p;
 }
 
 template<typename T>
-Node<T>* searchMin(Node<T>* p) {
+Node<T>* SearchMin(Node<T>* p) {
     while(p->left != nullptr){
         p = p->left;
     }
@@ -219,24 +234,30 @@ Node<T>* searchMin(Node<T>* p) {
 }
 
 template<typename T>
-Node<T> *removeMin(Node<T>* p) {
+Node<T>*Remove_Min(Node<T>* p){
+    Node<T>* node = SearchMin(p);
+    Remove(p, node->data);
+}
+
+template<typename T>
+Node<T> *RemoveMin(Node<T>* p) {
     if(p->left == nullptr) return p->right;
-    p->left = removeMin(p->left);
+    p->left = RemoveMin(p->left);
     return balance(p);
 }
 
 template<typename T>
-Node<T> remove(Node<T> *p, T k) {
-    if(!p) return nullptr;
-    else if(p->data > k) p->left = remove(p->left(), k);
-    else if(p->data < k) p->right = remove(p->right, k);
+Node<T>* Remove(Node<T> *p, T k) {
+    if(p == nullptr) return nullptr;
+    else if(p->data > k) p->left = Remove(p->left, k);
+    else if(p->data < k) p->right = Remove(p->right, k);
     else{
         Node<T>* l = p->left;
         Node<T>* r = p->right;
         delete p;
-        if(!r) return l;
-        Node<T>* min = searchMin(r);
-        min->right = removeMin(r);
+        if(r == nullptr) return l;
+        Node<T>* min = SearchMin(r);
+        min->right = RemoveMin(r);
         min->left = l;
         return balance(min);
     }
